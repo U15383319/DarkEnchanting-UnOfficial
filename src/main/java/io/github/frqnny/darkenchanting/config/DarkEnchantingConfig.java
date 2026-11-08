@@ -125,9 +125,15 @@ public final class DarkEnchantingConfig {
         }
     }
 
+    @SuppressWarnings("unchecked")
     private static <T> T get(ForgeConfigSpec spec, ForgeConfigSpec.ConfigValue<T> value) {
         // Server config is only loaded while a world is open; fall back to defaults otherwise.
-        return spec.isLoaded() ? value.get() : value.getDefault();
+        // (1.18.2's ConfigValue has no getDefault(), so read it from the value's spec entry.)
+        if (spec.isLoaded()) {
+            return value.get();
+        }
+        ForgeConfigSpec.ValueSpec valueSpec = spec.getSpec().get(value.getPath());
+        return (T) valueSpec.getDefault();
     }
 
     public static boolean hasFancyShrineParticle() {

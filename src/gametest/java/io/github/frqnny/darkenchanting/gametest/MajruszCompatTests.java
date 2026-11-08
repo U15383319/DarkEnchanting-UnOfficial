@@ -33,13 +33,14 @@ import net.minecraftforge.gametest.PrefixGameTestTemplate;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.slf4j.Logger;
 
-import java.lang.reflect.Method;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /**
@@ -86,7 +87,7 @@ public class MajruszCompatTests {
      */
     private static ServerPlayer survivalPlayer(GameTestHelper helper) {
         ServerLevel level = helper.getLevel();
-        ServerPlayer player = new ServerPlayer(level.getServer(), level, new GameProfile(UUID.randomUUID(), "dark-enchanting-test"), null);
+        ServerPlayer player = new ServerPlayer(level.getServer(), level, new GameProfile(UUID.randomUUID(), "dark-enchanting-test"));
         new ServerGamePacketListenerImpl(level.getServer(), new Connection(PacketFlow.SERVERBOUND), player);
         return player;
     }
@@ -364,22 +365,58 @@ public class MajruszCompatTests {
         }
 
         try {
-            Method setEnabled = target.getClass().getMethod("setEnabled", boolean.class);
-            setEnabled.invoke(target, false);
+            registerAvailabilityOverride();
+            disabledForTest = target;
             try {
                 if (EnchantingUtils.getAvailableEnchantments(sword, none(), none()).contains(target)) {
                     helper.fail(id(target) + " is still listed after being disabled in Majrusz's config");
                     return;
                 }
             } finally {
-                setEnabled.invoke(target, true);
+                disabledForTest = null;
             }
         } catch (ReflectiveOperationException e) {
-            helper.fail("Could not toggle " + id(target) + ": " + e);
+            helper.fail("Could not disable " + id(target) + ": " + e);
+            return;
+        }
+
+        if (!EnchantingUtils.getAvailableEnchantments(sword, none(), none()).contains(target)) {
+            helper.fail(id(target) + " did not come back after being re-enabled");
             return;
         }
 
         LOGGER.info("[compat] {} hidden while disabled in Majrusz's config", id(target));
         helper.succeed();
+    }
+
+    // Majrusz Library 5.x (1.18.2) has no CustomEnchantment#setEnabled. Whether an enchantment is enabled is decided
+    // by OnEnchantmentAvailabilityCheck listeners (its config switch is one of them), checked inside canEnchant.
+    // Register one extra listener, run last, that switches off the enchantment in disabledForTest.
+    private static volatile Enchantment disabledForTest;
+    private static boolean availabilityOverrideRegistered;
+
+    private static synchronized void registerAvailabilityOverride() throws ReflectiveOperationException {
+        if (availabilityOverrideRegistered) {
+            return;
+        }
+        Class<?> check = Class.forName("com.mlib.contexts.OnEnchantmentAvailabilityCheck");
+        Class<?> data = Class.forName("com.mlib.contexts.OnEnchantmentAvailabilityCheck$Data");
+        Class<?> priority = Class.forName("com.mlib.contexts.base.Priority");
+        Field enchantmentField = data.getField("enchantment");
+        Field availableField = data.getField("isAvailable");
+
+        Consumer<Object> listener = event -> {
+            try {
+                Enchantment disabled = disabledForTest;
+                if (disabled != null && enchantmentField.get(event) == disabled) {
+                    availableField.setBoolean(event, false);
+                }
+            } catch (IllegalAccessException e) {
+                throw new IllegalStateException(e);
+            }
+        };
+        Object context = check.getMethod("listen", Consumer.class).invoke(null, listener);
+        context.getClass().getMethod("priority", priority).invoke(context, priority.getField("LOWEST").get(null));
+        availabilityOverrideRegistered = true;
     }
 }

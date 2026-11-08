@@ -11,9 +11,9 @@ import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 
 public class ModMenus {
-    public static final DeferredRegister<MenuType<?>> MENUS = DeferredRegister.create(ForgeRegistries.MENU_TYPES, DarkEnchanting.MODID);
+    public static final DeferredRegister<MenuType<?>> MENUS = DeferredRegister.create(ForgeRegistries.CONTAINERS, DarkEnchanting.MODID);
 
-    // The client receives the block position written by NetworkHooks.openScreen.
+    // The client receives the block position written by NetworkHooks.openGui.
     public static final RegistryObject<MenuType<DarkEnchanterMenu>> DARK_ENCHANTER = MENUS.register("dark_enchanter_gui",
             () -> IForgeMenuType.create((containerId, inventory, buf) ->
                     new DarkEnchanterMenu(containerId, inventory, ContainerLevelAccess.create(inventory.player.level, buf.readBlockPos()))));

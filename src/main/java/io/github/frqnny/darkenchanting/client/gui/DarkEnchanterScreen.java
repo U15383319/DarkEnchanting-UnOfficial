@@ -1,5 +1,8 @@
 package io.github.frqnny.darkenchanting.client.gui;
 
+import com.mojang.blaze3d.platform.Window;
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import io.github.frqnny.darkenchanting.DarkEnchanting;
 import io.github.frqnny.darkenchanting.menu.DarkEnchanterMenu;
 import io.github.frqnny.darkenchanting.network.ApplyEnchantmentsPacket;
@@ -12,13 +15,12 @@ import io.github.frqnny.darkenchanting.util.PlayerUtils;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.minecraft.ChatFormatting;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Inventory;
@@ -107,9 +109,9 @@ public class DarkEnchanterScreen extends AbstractContainerScreen<DarkEnchanterMe
         this.leftPos = this.computeLeftPos();
 
         this.enchantButton = this.addRenderableWidget(new Button(this.leftPos + 35, this.topPos + 60, 20, 20,
-                Component.literal("E"), b -> this.enchant(), this.tooltip(Component.translatable("gui.dark_enchanting.enchant"))));
+                new TextComponent("E"), b -> this.enchant(), this.tooltip(new TranslatableComponent("gui.dark_enchanting.enchant"))));
         this.repairButton = this.addRenderableWidget(new Button(this.leftPos + 35, this.topPos + 85, 20, 20,
-                Component.literal("R"), b -> this.repair(), this.tooltip(Component.translatable("gui.dark_enchanting.repair"))));
+                new TextComponent("R"), b -> this.repair(), this.tooltip(new TranslatableComponent("gui.dark_enchanting.repair"))));
         this.enchantButton.active = this.enchantEnabled;
         this.repairButton.active = this.repairEnabled;
 
@@ -235,25 +237,25 @@ public class DarkEnchanterScreen extends AbstractContainerScreen<DarkEnchanterMe
 
     private List<Component> getCostSummary() {
         Component enchantLine = this.enchantCost > 0
-                ? Component.translatable("gui.dark_enchanting.pay", this.enchantCost)
-                : Component.translatable("gui.dark_enchanting.receive", -this.enchantCost);
+                ? new TranslatableComponent("gui.dark_enchanting.pay", this.enchantCost)
+                : new TranslatableComponent("gui.dark_enchanting.receive", -this.enchantCost);
 
         return List.of(
-                Component.translatable("gui.dark_enchanting.enchant_cost").withStyle(ChatFormatting.DARK_GREEN),
+                new TranslatableComponent("gui.dark_enchanting.enchant_cost").withStyle(ChatFormatting.DARK_GREEN),
                 enchantLine,
-                Component.empty(),
-                Component.empty(),
-                Component.translatable("gui.dark_enchanting.repair_cost").withStyle(ChatFormatting.BLUE),
-                Component.translatable("gui.dark_enchanting.pay", this.repairCost),
-                Component.empty(),
-                Component.empty(),
-                Component.translatable("gui.dark_enchanting.shrine_discount").withStyle(ChatFormatting.DARK_PURPLE),
-                Component.literal(this.bookcaseStats1 + this.bookcaseStats2 + this.bookcaseStats3 + " " + this.bookshelfDiscount + " %"),
-                Component.empty(),
-                Component.empty(),
-                Component.translatable("gui.dark_enchanting.you_have", PlayerUtils.getTotalExperience(this.player)).withStyle(ChatFormatting.GOLD),
-                Component.empty(),
-                Component.empty());
+                TextComponent.EMPTY,
+                TextComponent.EMPTY,
+                new TranslatableComponent("gui.dark_enchanting.repair_cost").withStyle(ChatFormatting.BLUE),
+                new TranslatableComponent("gui.dark_enchanting.pay", this.repairCost),
+                TextComponent.EMPTY,
+                TextComponent.EMPTY,
+                new TranslatableComponent("gui.dark_enchanting.shrine_discount").withStyle(ChatFormatting.DARK_PURPLE),
+                new TextComponent(this.bookcaseStats1 + this.bookcaseStats2 + this.bookcaseStats3 + " " + this.bookshelfDiscount + " %"),
+                TextComponent.EMPTY,
+                TextComponent.EMPTY,
+                new TranslatableComponent("gui.dark_enchanting.you_have", PlayerUtils.getTotalExperience(this.player)).withStyle(ChatFormatting.GOLD),
+                TextComponent.EMPTY,
+                TextComponent.EMPTY);
     }
 
     private int costPanelTextWidth(List<Component> summary) {
@@ -281,7 +283,7 @@ public class DarkEnchanterScreen extends AbstractContainerScreen<DarkEnchanterMe
         // Right-align the panel to the window so longer translations grow to the left instead of covering the slot.
         int x = this.leftPos - COST_PANEL_GAP - TOOLTIP_FRAME - textWidth - TOOLTIP_OFFSET;
         x = Math.max(x, TOOLTIP_FRAME + 1 - TOOLTIP_OFFSET);
-        this.renderComponentTooltip(poseStack, summary, x, this.topPos + COST_PANEL_Y);
+        this.renderComponentTooltip(poseStack, summary, x, this.topPos + COST_PANEL_Y, this.font);
     }
 
     // ---------------------------------------------------------------- scrolling list
@@ -416,13 +418,13 @@ public class DarkEnchanterScreen extends AbstractContainerScreen<DarkEnchanterMe
         int sliderMouseX = mouseInList ? mouseX : -1000;
         int sliderMouseY = mouseInList ? mouseY : -1000;
 
-        GuiComponent.enableScissor(x, y, x + LIST_WIDTH, y + LIST_HEIGHT);
+        this.enableScissor(x, y, x + LIST_WIDTH, y + LIST_HEIGHT);
         for (EnchantmentSlider slider : this.enchantmentSliders) {
             if (slider.y + SLIDER_HEIGHT >= y && slider.y <= y + LIST_HEIGHT) {
                 slider.render(poseStack, sliderMouseX, sliderMouseY, partialTick);
             }
         }
-        GuiComponent.disableScissor();
+        RenderSystem.disableScissor();
 
         int maxScroll = this.maxScroll();
         if (maxScroll > 0) {
@@ -433,6 +435,20 @@ public class DarkEnchanterScreen extends AbstractContainerScreen<DarkEnchanterMe
             fill(poseStack, barX, thumbY, barX + SCROLLBAR_WIDTH, thumbY + thumb, 0xFF808080);
             fill(poseStack, barX, thumbY, barX + SCROLLBAR_WIDTH - 1, thumbY + thumb - 1, 0xFFC0C0C0);
         }
+    }
+
+    /**
+     * Clip rendering to a GUI-space rectangle. 1.18.2 has no GuiComponent#enableScissor, and RenderSystem's scissor
+     * takes window pixels with the origin at the bottom-left.
+     */
+    private void enableScissor(int minX, int minY, int maxX, int maxY) {
+        Window window = this.minecraft.getWindow();
+        double scale = window.getGuiScale();
+        int x = (int) (minX * scale);
+        int y = (int) (window.getHeight() - maxY * scale);
+        int width = Math.max(0, (int) ((maxX - minX) * scale));
+        int height = Math.max(0, (int) ((maxY - minY) * scale));
+        RenderSystem.enableScissor(x, y, width, height);
     }
 
     @Override

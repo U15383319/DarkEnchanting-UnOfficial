@@ -9,7 +9,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.util.RandomSource;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -33,6 +32,8 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraftforge.network.NetworkHooks;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Random;
 
 public class DarkEnchanterBlock extends BaseEntityBlock {
     public static final EnumProperty<BookType> BOOK_TYPE = EnumProperty.create("book_type", BookType.class);
@@ -59,7 +60,7 @@ public class DarkEnchanterBlock extends BaseEntityBlock {
         MenuProvider provider = state.getMenuProvider(level, pos);
         if (provider != null && player instanceof ServerPlayer serverPlayer) {
             // Sends the block position to the client, replacing Fabric's ExtendedScreenHandlerFactory.
-            NetworkHooks.openScreen(serverPlayer, provider, pos);
+            NetworkHooks.openGui(serverPlayer, provider, pos);
         }
         return InteractionResult.CONSUME;
     }
@@ -80,7 +81,7 @@ public class DarkEnchanterBlock extends BaseEntityBlock {
     }
 
     @Override
-    public void animateTick(BlockState state, Level level, BlockPos pos, RandomSource random) {
+    public void animateTick(BlockState state, Level level, BlockPos pos, Random random) {
         super.animateTick(state, level, pos, random);
 
         //inner circle

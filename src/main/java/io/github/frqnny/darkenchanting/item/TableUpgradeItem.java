@@ -3,6 +3,7 @@ package io.github.frqnny.darkenchanting.item;
 import io.github.frqnny.darkenchanting.init.ModBlocks;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
@@ -29,14 +30,14 @@ public class TableUpgradeItem extends Item {
             context.getItemInHand().shrink(1);
             return InteractionResult.SUCCESS;
         } else if (context.getPlayer() != null) {
-            context.getPlayer().displayClientMessage(Component.translatable("message.dark_enchanting.table_upgrade"), true);
+            context.getPlayer().displayClientMessage(new TranslatableComponent("message.dark_enchanting.table_upgrade"), true);
         }
         return InteractionResult.PASS;
     }
 
     @Override
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
-        player.displayClientMessage(Component.translatable("message.dark_enchanting.table_upgrade"), true);
+        player.displayClientMessage(new TranslatableComponent("message.dark_enchanting.table_upgrade"), true);
         return super.use(level, player, hand);
     }
 }

@@ -5,6 +5,8 @@ import io.github.frqnny.darkenchanting.client.renderer.DarkEnchanterBlockEntityR
 import io.github.frqnny.darkenchanting.init.ModBlocks;
 import io.github.frqnny.darkenchanting.init.ModMenus;
 import net.minecraft.client.gui.screens.MenuScreens;
+import net.minecraft.client.renderer.ItemBlockRenderTypes;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.EntityRenderersEvent;
@@ -14,7 +16,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 
 /**
- * Client-side setup. The dark conduit's cutout render type is declared in its block models ("render_type").
+ * Client-side setup: menu screen, block entity renderer, render layers and the book texture.
  */
 @Mod.EventBusSubscriber(modid = DarkEnchanting.MODID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 public final class DarkEnchantingClient {
@@ -23,7 +25,12 @@ public final class DarkEnchantingClient {
 
     @SubscribeEvent
     public static void onClientSetup(FMLClientSetupEvent event) {
-        event.enqueueWork(() -> MenuScreens.register(ModMenus.DARK_ENCHANTER.get(), DarkEnchanterScreen::new));
+        event.enqueueWork(() -> {
+            MenuScreens.register(ModMenus.DARK_ENCHANTER.get(), DarkEnchanterScreen::new);
+            // 1.18.2 models cannot declare "render_type"; the dark conduit needs the cutout layer.
+            ItemBlockRenderTypes.setRenderLayer(ModBlocks.DARK_TORCH.get(), RenderType.cutout());
+            ItemBlockRenderTypes.setRenderLayer(ModBlocks.DARK_TORCH_WALL.get(), RenderType.cutout());
+        });
     }
 
     @SubscribeEvent

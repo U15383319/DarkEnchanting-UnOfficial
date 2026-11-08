@@ -2,15 +2,16 @@ package io.github.frqnny.darkenchanting.blockentity;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 
+import java.util.Random;
+
 public class BlockEntityWithBook extends BlockEntity {
-    private static final RandomSource RANDOM = RandomSource.create();
+    private static final Random RANDOM = new Random();
     public int ticks;
     public float nextPageAngle;
     public float pageAngle;

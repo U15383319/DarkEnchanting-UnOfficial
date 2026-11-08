@@ -4,6 +4,8 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.components.AbstractSliderButton;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.item.enchantment.Enchantment;
 
 import java.util.function.IntConsumer;
@@ -18,7 +20,7 @@ public class EnchantmentSlider extends AbstractSliderButton {
     private int level;
 
     public EnchantmentSlider(int x, int y, int width, int height, Enchantment enchantment, int level, IntConsumer onLevelChanged) {
-        super(x, y, width, height, Component.empty(), toValue(level, enchantment.getMaxLevel()));
+        super(x, y, width, height, TextComponent.EMPTY, toValue(level, enchantment.getMaxLevel()));
         this.enchantment = enchantment;
         this.maxLevel = enchantment.getMaxLevel();
         this.onLevelChanged = onLevelChanged;
@@ -31,7 +33,7 @@ public class EnchantmentSlider extends AbstractSliderButton {
     }
 
     public static Component getLabel(Enchantment enchantment, int level) {
-        MutableComponent text = Component.translatable(enchantment.getDescriptionId());
+        MutableComponent text = new TranslatableComponent(enchantment.getDescriptionId());
         if (enchantment.isCurse()) {
             text.withStyle(ChatFormatting.RED);
         } else if (enchantment.isTreasureOnly()) {
@@ -41,7 +43,7 @@ public class EnchantmentSlider extends AbstractSliderButton {
         }
 
         if (level > 0) {
-            text.append(" ").append(Component.translatable("enchantment.level." + level));
+            text.append(" ").append(new TranslatableComponent("enchantment.level." + level));
         }
 
         return text;

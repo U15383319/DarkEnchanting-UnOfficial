@@ -5,10 +5,11 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.util.Mth;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.TorchBlock;
 import net.minecraft.world.level.block.state.BlockState;
+
+import java.util.Random;
 
 public class DarkConduitBlock extends TorchBlock {
     public DarkConduitBlock(Properties properties, ParticleOptions particle) {
@@ -16,7 +17,7 @@ public class DarkConduitBlock extends TorchBlock {
     }
 
     @Override
-    public void animateTick(BlockState state, Level level, BlockPos pos, RandomSource random) {
+    public void animateTick(BlockState state, Level level, BlockPos pos, Random random) {
         if (DarkEnchantingConfig.hasFancyShrineParticle()) {
             int i = pos.getX();
             int j = pos.getY();

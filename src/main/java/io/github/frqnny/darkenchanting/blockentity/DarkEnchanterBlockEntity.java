@@ -4,6 +4,7 @@ import io.github.frqnny.darkenchanting.init.ModBlocks;
 import io.github.frqnny.darkenchanting.menu.DarkEnchanterMenu;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -19,7 +20,7 @@ public class DarkEnchanterBlockEntity extends BlockEntityWithBook implements Men
 
     @Override
     public Component getDisplayName() {
-        return Component.translatable("block.dark_enchanting.dark_enchanter");
+        return new TranslatableComponent("block.dark_enchanting.dark_enchanter");
     }
 
     @Nullable
