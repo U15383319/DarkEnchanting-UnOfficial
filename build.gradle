@@ -55,7 +55,9 @@ minecraft {
         }
 
         // Runs every dark_enchanting game test (including the compatibility tests in src/gametest), then exits.
+        // Uses its own directory so the throwaway test world never mixes with run/ (shared by all branches).
         gameTestServer {
+            workingDirectory project.file('run-gametest')
             property 'forge.enabledGameTestNamespaces', mod_id
             mods {
                 "${mod_id}" {
@@ -93,13 +95,34 @@ dependencies {
 }
 
 // Majrusz Library discovers its classes by scanning jars in the game's ./mods folder, so it fails when loaded from
-// the Gradle classpath. Copy the remapped (official-name) jars into run/mods before each dev run instead.
-def copyDevMods = tasks.register('copyDevMods', Copy) {
-    from configurations.devMods
-    into file('run/mods')
+// the Gradle classpath. Sync the remapped (official-name) jars into <run dir>/mods before each dev run instead.
+// They get a "devmod-" prefix: stale devmod jars (e.g. from another branch's Minecraft version) are removed,
+// anything else in mods/ is left alone.
+def devModsTask = { String name, String runDir ->
+    tasks.register(name, Sync) {
+        from configurations.devMods
+        into file("${runDir}/mods")
+        rename { "devmod-${it}" }
+        preserve {
+            include '**/*'
+            exclude 'devmod-*'
+        }
+    }
 }
+def copyDevMods = devModsTask('copyDevMods', 'run')
+def copyGameTestDevMods = devModsTask('copyGameTestDevMods', 'run-gametest')
+
+// The game test world is throwaway; recreate it on every run.
+def cleanGameTestWorld = tasks.register('cleanGameTestWorld', Delete) {
+    delete file('run-gametest/world')
+}
+
 tasks.matching { it.name.startsWith('prepareRun') }.configureEach {
-    dependsOn copyDevMods
+    if (it.name.startsWith('prepareRunGameTestServer')) {
+        dependsOn copyGameTestDevMods, cleanGameTestWorld
+    } else {
+        dependsOn copyDevMods
+    }
 }
 
 tasks.named('processResources', ProcessResources).configure {
