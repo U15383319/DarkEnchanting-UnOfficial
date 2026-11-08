@@ -5,7 +5,7 @@ import io.github.frqnny.darkenchanting.init.ModBlocks;
 import io.github.frqnny.darkenchanting.init.ModItems;
 import io.github.frqnny.darkenchanting.init.ModMenus;
 import io.github.frqnny.darkenchanting.network.ModPackets;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;

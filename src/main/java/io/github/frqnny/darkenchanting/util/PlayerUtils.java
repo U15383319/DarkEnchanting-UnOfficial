@@ -1,36 +1,36 @@
 package io.github.frqnny.darkenchanting.util;
 
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.util.Mth;
-import net.minecraft.world.entity.player.Player;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.util.math.MathHelper;
 
 //Due to horrible vanilla methods, these should be used instead when dealing with xp
 public class PlayerUtils {
 
-    public static void syncExperience(Player player) {
+    public static void syncExperience(PlayerEntity player) {
         syncExperience(player, getTotalExperience(player));
     }
 
-    public static void syncExperience(Player player, int totalExperience) {
+    public static void syncExperience(PlayerEntity player, int totalExperience) {
         player.giveExperiencePoints(0);
         player.giveExperienceLevels(0);
 
         player.totalExperience = totalExperience;
 
-        if (player instanceof ServerPlayer serverPlayer) {
-            serverPlayer.giveExperiencePoints(0);
+        if (player instanceof ServerPlayerEntity) {
+            player.giveExperiencePoints(0);
         }
 
     }
 
-    public static int syncAndGetTotalExperience(Player player) {
+    public static int syncAndGetTotalExperience(PlayerEntity player) {
         int totalExperience = getTotalExperience(player);
         syncExperience(player, totalExperience);
 
         return totalExperience;
     }
 
-    public static int getTotalExperience(Player player) {
+    public static int getTotalExperience(PlayerEntity player) {
         int experienceLevel = player.experienceLevel;
         int experienceFromFullLevels = 0;
 
@@ -55,11 +55,11 @@ public class PlayerUtils {
     }
 
     //supports negative and positive operations
-    //Player#giveExperiencePoints only supports positive
-    public static void modifyExperience(Player player, int experience) {
+    //PlayerEntity#giveExperiencePoints only supports positive
+    public static void modifyExperience(PlayerEntity player, int experience) {
 
         player.increaseScore(Math.abs(experience));
-        player.totalExperience = Mth.clamp(player.totalExperience + experience, 0, Integer.MAX_VALUE);
+        player.totalExperience = MathHelper.clamp(player.totalExperience + experience, 0, Integer.MAX_VALUE);
 
         //recalculate player level and experience progress
         int playerLevel = 0;
@@ -74,8 +74,8 @@ public class PlayerUtils {
         player.experienceLevel = playerLevel;
         player.experienceProgress = (float) countExperience / (float) getExperienceNeededForLevel(playerLevel);
 
-        if (player instanceof ServerPlayer serverPlayer) {
-            serverPlayer.giveExperiencePoints(0);
+        if (player instanceof ServerPlayerEntity) {
+            player.giveExperiencePoints(0);
         }
     }
 

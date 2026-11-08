@@ -3,20 +3,20 @@ package io.github.frqnny.darkenchanting.menu;
 import io.github.frqnny.darkenchanting.init.ModBlocks;
 import io.github.frqnny.darkenchanting.init.ModMenus;
 import io.github.frqnny.darkenchanting.util.PlayerUtils;
-import net.minecraft.world.Container;
-import net.minecraft.world.SimpleContainer;
-import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.ContainerLevelAccess;
-import net.minecraft.world.inventory.Slot;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.inventory.IInventory;
+import net.minecraft.inventory.Inventory;
+import net.minecraft.inventory.container.Container;
+import net.minecraft.inventory.container.Slot;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.IWorldPosCallable;
 
 /**
  * Server/client container of the Dark Enchanter. Replaces the container half of LibGui's SyncedGuiDescription;
  * the UI half lives in {@link io.github.frqnny.darkenchanting.client.gui.DarkEnchanterScreen}.
  */
-public class DarkEnchanterMenu extends AbstractContainerMenu {
+public class DarkEnchanterMenu extends Container {
     // Kept within 240 logical pixels of height so the screen fits the smallest "Auto" GUI scale (320x240).
     // The LibGui original was 252 tall; the enchantment list is 12 px shorter and the player inventory moved up.
     public static final int WIDTH = 235;
@@ -31,8 +31,8 @@ public class DarkEnchanterMenu extends AbstractContainerMenu {
     private static final int PLAYER_INV_START = 1;
     private static final int PLAYER_INV_END = PLAYER_INV_START + 36;
 
-    public final ContainerLevelAccess access;
-    private final Container inv = new SimpleContainer(1) {
+    public final IWorldPosCallable access;
+    private final IInventory inv = new Inventory(1) {
         @Override
         public void setChanged() {
             super.setChanged();
@@ -40,7 +40,7 @@ public class DarkEnchanterMenu extends AbstractContainerMenu {
         }
     };
 
-    public DarkEnchanterMenu(int containerId, Inventory playerInventory, ContainerLevelAccess access) {
+    public DarkEnchanterMenu(int containerId, PlayerInventory playerInventory, IWorldPosCallable access) {
         super(ModMenus.DARK_ENCHANTER.get(), containerId);
         PlayerUtils.syncExperience(playerInventory.player);
         this.access = access;
@@ -85,7 +85,7 @@ public class DarkEnchanterMenu extends AbstractContainerMenu {
     }
 
     @Override
-    public ItemStack quickMoveStack(Player player, int index) {
+    public ItemStack quickMoveStack(PlayerEntity player, int index) {
         ItemStack result = ItemStack.EMPTY;
         Slot slot = this.slots.get(index);
         if (slot.hasItem()) {
@@ -123,16 +123,16 @@ public class DarkEnchanterMenu extends AbstractContainerMenu {
     }
 
     @Override
-    public boolean stillValid(Player player) {
+    public boolean stillValid(PlayerEntity player) {
         return stillValid(this.access, player, ModBlocks.DARK_ENCHANTER.get());
     }
 
     @Override
-    public void removed(Player player) {
+    public void removed(PlayerEntity player) {
         super.removed(player);
         // The client menu also has a real level access (needed for cost previews), so only return items on the server.
         if (!player.level.isClientSide) {
-            this.clearContainer(player, this.inv);
+            this.clearContainer(player, player.level, this.inv);
         }
     }
 }

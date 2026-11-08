@@ -3,13 +3,14 @@ package io.github.frqnny.darkenchanting.util;
 import io.github.frqnny.darkenchanting.config.ConfigEnchantment;
 import io.github.frqnny.darkenchanting.config.DarkEnchantingConfig;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.item.enchantment.Enchantment;
-import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.enchantment.Enchantment;
+import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.ListNBT;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.ArrayList;
@@ -65,7 +66,7 @@ public class EnchantingUtils {
         return true;
     }
 
-    public static boolean applyEnchantXP(Player player, Object2IntMap<Enchantment> enchantmentsToApply, Object2IntMap<Enchantment> enchantmentsOnStack, double discount) {
+    public static boolean applyEnchantXP(PlayerEntity player, Object2IntMap<Enchantment> enchantmentsToApply, Object2IntMap<Enchantment> enchantmentsOnStack, double discount) {
         int totalExperience = PlayerUtils.syncAndGetTotalExperience(player);
         int xpCost = BookcaseUtils.applyDiscount(CostUtils.getExperienceCost(enchantmentsToApply, enchantmentsOnStack), discount);
 
@@ -77,7 +78,7 @@ public class EnchantingUtils {
         return canApplyXp;
     }
 
-    public static boolean applyRepairXP(Player player, ItemStack stack, double discount) {
+    public static boolean applyRepairXP(PlayerEntity player, ItemStack stack, double discount) {
         int totalExperience = PlayerUtils.syncAndGetTotalExperience(player);
         int xpCost = BookcaseUtils.applyDiscount(CostUtils.getRepairCost(stack), discount);
 
@@ -90,17 +91,17 @@ public class EnchantingUtils {
     }
 
     public static void set(Object2IntMap<Enchantment> enchantments, ItemStack stack) {
-        ListTag nbtList = new ListTag();
+        ListNBT nbtList = new ListNBT();
 
         for (var entry : enchantments.object2IntEntrySet()) {
             Enchantment enchantment = entry.getKey();
             if (enchantment != null) {
                 int i = entry.getIntValue();
-                ResourceLocation id = EnchantmentHelper.getEnchantmentId(enchantment);
+                ResourceLocation id = ForgeRegistries.ENCHANTMENTS.getKey(enchantment);
 
                 boolean shouldCheckMaxLevelEnch = DarkEnchantingConfig.shouldRejectEnchantmentAttemptsAboveMaxValue();
                 if (id != null && i > 0 && (!shouldCheckMaxLevelEnch || i <= enchantment.getMaxLevel())) {
-                    nbtList.add(EnchantmentHelper.storeEnchantment(id, i));
+                    nbtList.add(storeEnchantment(id, i));
                 }
 
             }
@@ -108,9 +109,19 @@ public class EnchantingUtils {
 
         if (nbtList.isEmpty()) {
             stack.removeTagKey("Enchantments");
-        } else if (!stack.is(Items.ENCHANTED_BOOK)) {
-            stack.addTagElement("Enchantments", nbtList);
+        } else if (stack.getItem() != Items.ENCHANTED_BOOK) {
+            stack.getOrCreateTag().put("Enchantments", nbtList);
         }
 
+    }
+
+    /**
+     * Same entry format as vanilla's ItemStack#enchant (1.16.5 has no EnchantmentHelper#storeEnchantment).
+     */
+    private static CompoundNBT storeEnchantment(ResourceLocation id, int level) {
+        CompoundNBT tag = new CompoundNBT();
+        tag.putString("id", String.valueOf(id));
+        tag.putShort("lvl", (short) level);
+        return tag;
     }
 }

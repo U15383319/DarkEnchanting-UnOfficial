@@ -1,41 +1,37 @@
 package io.github.frqnny.darkenchanting.block;
 
 import io.github.frqnny.darkenchanting.DarkEnchanting;
-import io.github.frqnny.darkenchanting.blockentity.BlockEntityWithBook;
 import io.github.frqnny.darkenchanting.blockentity.DarkEnchanterBlockEntity;
-import io.github.frqnny.darkenchanting.init.ModBlocks;
 import io.github.frqnny.darkenchanting.util.PlayerUtils;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.util.StringRepresentable;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
-import net.minecraft.world.MenuProvider;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.BaseEntityBlock;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.RenderShape;
-import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.entity.BlockEntityTicker;
-import net.minecraft.world.level.block.entity.BlockEntityType;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.StateDefinition;
-import net.minecraft.world.level.block.state.properties.EnumProperty;
-import net.minecraft.world.level.pathfinder.PathComputationType;
-import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.phys.shapes.CollisionContext;
-import net.minecraft.world.phys.shapes.VoxelShape;
-import net.minecraftforge.network.NetworkHooks;
-import org.jetbrains.annotations.Nullable;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockRenderType;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
+import net.minecraft.block.ContainerBlock;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.inventory.container.INamedContainerProvider;
+import net.minecraft.particles.ParticleTypes;
+import net.minecraft.pathfinding.PathType;
+import net.minecraft.state.EnumProperty;
+import net.minecraft.state.StateContainer;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.ActionResultType;
+import net.minecraft.util.Hand;
+import net.minecraft.util.IStringSerializable;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.BlockRayTraceResult;
+import net.minecraft.util.math.shapes.ISelectionContext;
+import net.minecraft.util.math.shapes.VoxelShape;
+import net.minecraft.world.IBlockReader;
+import net.minecraft.world.World;
+import net.minecraftforge.fml.network.NetworkHooks;
 
 import java.util.Random;
+import javax.annotation.Nullable;
 
-public class DarkEnchanterBlock extends BaseEntityBlock {
+public class DarkEnchanterBlock extends ContainerBlock {
     public static final EnumProperty<BookType> BOOK_TYPE = EnumProperty.create("book_type", BookType.class);
     private static final VoxelShape SHAPE = Block.box(0.0D, 0.0D, 0.0D, 16.0D, 12.0D, 16.0D);
 
@@ -44,35 +40,38 @@ public class DarkEnchanterBlock extends BaseEntityBlock {
         this.registerDefaultState(this.stateDefinition.any().setValue(BOOK_TYPE, BookType.DEFAULT));
     }
 
+    /**
+     * The block entity ticks itself (ITickableTileEntity) to animate the book; 1.16.5 has no block entity tickers.
+     */
     @Nullable
     @Override
-    public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
-        return new DarkEnchanterBlockEntity(pos, state);
+    public TileEntity newBlockEntity(IBlockReader level) {
+        return new DarkEnchanterBlockEntity();
     }
 
     @Override
-    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+    public ActionResultType use(BlockState state, World level, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult hit) {
         PlayerUtils.syncExperience(player);
         if (level.isClientSide) {
-            return InteractionResult.SUCCESS;
+            return ActionResultType.SUCCESS;
         }
 
-        MenuProvider provider = state.getMenuProvider(level, pos);
-        if (provider != null && player instanceof ServerPlayer serverPlayer) {
+        INamedContainerProvider provider = state.getMenuProvider(level, pos);
+        if (provider != null && player instanceof ServerPlayerEntity) {
             // Sends the block position to the client, replacing Fabric's ExtendedScreenHandlerFactory.
-            NetworkHooks.openGui(serverPlayer, provider, pos);
+            NetworkHooks.openGui((ServerPlayerEntity) player, provider, pos);
         }
-        return InteractionResult.CONSUME;
+        return ActionResultType.CONSUME;
     }
 
     @Override
-    public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
+    public VoxelShape getShape(BlockState state, IBlockReader level, BlockPos pos, ISelectionContext context) {
         return SHAPE;
     }
 
     @Override
-    public RenderShape getRenderShape(BlockState state) {
-        return RenderShape.MODEL;
+    public BlockRenderType getRenderShape(BlockState state) {
+        return BlockRenderType.MODEL;
     }
 
     @Override
@@ -81,7 +80,7 @@ public class DarkEnchanterBlock extends BaseEntityBlock {
     }
 
     @Override
-    public void animateTick(BlockState state, Level level, BlockPos pos, Random random) {
+    public void animateTick(BlockState state, World level, BlockPos pos, Random random) {
         super.animateTick(state, level, pos, random);
 
         //inner circle
@@ -109,23 +108,17 @@ public class DarkEnchanterBlock extends BaseEntityBlock {
     }
 
     @Override
-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
+    protected void createBlockStateDefinition(StateContainer.Builder<Block, BlockState> builder) {
         builder.add(BOOK_TYPE);
     }
 
-    @Nullable
     @Override
-    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
-        return createTickerHelper(type, ModBlocks.DE_BLOCK_ENTITY.get(), (level1, pos, state1, be) -> BlockEntityWithBook.tick(level1, pos, be));
-    }
-
-    @Override
-    public boolean isPathfindable(BlockState state, BlockGetter level, BlockPos pos, PathComputationType type) {
+    public boolean isPathfindable(BlockState state, IBlockReader level, BlockPos pos, PathType type) {
         return false;
     }
 
     //TODO make it render based on the ID on here
-    public enum BookType implements StringRepresentable {
+    public enum BookType implements IStringSerializable {
         DEFAULT(DarkEnchanting.id("entity/book1"), "default"),
         HELL(DarkEnchanting.id("entity/book2"), "hell");
 

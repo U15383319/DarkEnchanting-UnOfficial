@@ -5,7 +5,6 @@ import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.config.ModConfig;
-import net.minecraftforge.fml.event.config.ModConfigEvent;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -97,7 +96,7 @@ public final class DarkEnchantingConfig {
                         "and a Mending entry that gives back less XP when disenchanting, to avoid Mending XP farming.")
                 .defineListAllowEmpty(List.of("configEnchantments"),
                         () -> List.of("minecraft:sharpness,true,1.0,1.0", "minecraft:mending,true,1.0,0.5"),
-                        o -> o instanceof String s && ConfigEnchantment.parse(s) != null);
+                        o -> o instanceof String && ConfigEnchantment.parse((String) o) != null);
         SERVER_SPEC = server.build();
     }
 
@@ -111,11 +110,11 @@ public final class DarkEnchantingConfig {
         modBus.addListener(DarkEnchantingConfig::onConfigReload);
     }
 
-    private static void onConfigLoad(ModConfigEvent.Loading event) {
+    private static void onConfigLoad(ModConfig.Loading event) {
         invalidate(event.getConfig());
     }
 
-    private static void onConfigReload(ModConfigEvent.Reloading event) {
+    private static void onConfigReload(ModConfig.Reloading event) {
         invalidate(event.getConfig());
     }
 

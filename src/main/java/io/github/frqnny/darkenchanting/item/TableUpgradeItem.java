@@ -1,19 +1,18 @@
 package io.github.frqnny.darkenchanting.item;
 
 import io.github.frqnny.darkenchanting.init.ModBlocks;
-import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
-import net.minecraft.world.InteractionResultHolder;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.context.UseOnContext;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.ItemUseContext;
+import net.minecraft.util.ActionResult;
+import net.minecraft.util.ActionResultType;
+import net.minecraft.util.Hand;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.world.World;
 
 public class TableUpgradeItem extends Item {
     public TableUpgradeItem(Properties properties) {
@@ -21,23 +20,23 @@ public class TableUpgradeItem extends Item {
     }
 
     @Override
-    public InteractionResult useOn(UseOnContext context) {
-        Level level = context.getLevel();
+    public ActionResultType useOn(ItemUseContext context) {
+        World level = context.getLevel();
         BlockPos pos = context.getClickedPos();
         BlockState state = level.getBlockState(pos);
         if (state.is(Blocks.ENCHANTING_TABLE)) {
             level.setBlockAndUpdate(pos, ModBlocks.DARK_ENCHANTER.get().defaultBlockState());
             context.getItemInHand().shrink(1);
-            return InteractionResult.SUCCESS;
+            return ActionResultType.SUCCESS;
         } else if (context.getPlayer() != null) {
-            context.getPlayer().displayClientMessage(new TranslatableComponent("message.dark_enchanting.table_upgrade"), true);
+            context.getPlayer().displayClientMessage(new TranslationTextComponent("message.dark_enchanting.table_upgrade"), true);
         }
-        return InteractionResult.PASS;
+        return ActionResultType.PASS;
     }
 
     @Override
-    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
-        player.displayClientMessage(new TranslatableComponent("message.dark_enchanting.table_upgrade"), true);
+    public ActionResult<ItemStack> use(World level, PlayerEntity player, Hand hand) {
+        player.displayClientMessage(new TranslationTextComponent("message.dark_enchanting.table_upgrade"), true);
         return super.use(level, player, hand);
     }
 }

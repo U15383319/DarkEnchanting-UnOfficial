@@ -4,14 +4,14 @@ package io.github.frqnny.darkenchanting.util;
 import io.github.frqnny.darkenchanting.config.DarkEnchantingConfig;
 import io.github.frqnny.darkenchanting.init.ModBlocks;
 import io.github.frqnny.darkenchanting.init.ModTags;
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Blocks;
+import net.minecraft.block.Blocks;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 
 public class BookcaseUtils {
 
     //Inner ring
-    public static boolean getObsidianCount(Level world, BlockPos blockPos) {
+    public static boolean getObsidianCount(World world, BlockPos blockPos) {
         int baseObsidian = 0;
         int z;
         for (z = -1; z <= 1; ++z) { // LOOP for Y level
@@ -41,7 +41,7 @@ public class BookcaseUtils {
         return baseObsidian == 16;
     }
 
-    public static int getBookshelfCount(Level world, BlockPos blockPos) {
+    public static int getBookshelfCount(World world, BlockPos blockPos) {
         int bookshelves = 0;
 
         int z;
@@ -97,7 +97,7 @@ public class BookcaseUtils {
     }
 
     //outer ring
-    public static boolean getObsidianCount2(Level world, BlockPos blockPos) {
+    public static boolean getObsidianCount2(World world, BlockPos blockPos) {
         int baseObsidian2 = 0;
         int z;
         int x;
@@ -134,7 +134,7 @@ public class BookcaseUtils {
 
     }
 
-    public static int getBookshelfCount2(Level world, BlockPos blockPos) {
+    public static int getBookshelfCount2(World world, BlockPos blockPos) {
         int bookshelves2 = 0;
 
         int z;
@@ -174,7 +174,7 @@ public class BookcaseUtils {
     }
 
 
-    public static int applyDiscount(int originalCost, Level world, BlockPos pos) {
+    public static int applyDiscount(int originalCost, World world, BlockPos pos) {
         return applyDiscount(originalCost, getDiscount(world, pos));
     }
 
@@ -182,7 +182,7 @@ public class BookcaseUtils {
         return (int) Math.ceil((originalCost * (1D - discount)));
     }
 
-    public static double getDiscount(Level world, BlockPos pos) {
+    public static double getDiscount(World world, BlockPos pos) {
         double halfDiscount = DarkEnchantingConfig.bookshelvesDiscount() / 2D;
 
         double bookcase1 = getBookshelfCount(world, pos) / 15D * halfDiscount;
@@ -190,7 +190,7 @@ public class BookcaseUtils {
         return bookcase1 + bookcase2 + getConduitDiscount(world, pos);
     }
 
-    public static double getConduitDiscount(Level world, BlockPos pos) {
+    public static double getConduitDiscount(World world, BlockPos pos) {
         if (getBookshelfCount(world, pos) == 15D && getBookshelfCount2(world, pos) == 29D && getConduits(world, pos)) {
             return DarkEnchantingConfig.conduitDiscount();
         } else {
@@ -199,7 +199,7 @@ public class BookcaseUtils {
     }
 
     //Conduit Counter
-    public static boolean getConduits(Level world, BlockPos blockPos) {
+    public static boolean getConduits(World world, BlockPos blockPos) {
         int conduitCount = 0;
         int y = 5;
 
@@ -229,7 +229,7 @@ public class BookcaseUtils {
 
     }
 
-    public static boolean checkObsidianTower(Level world, BlockPos pos, int x, int z) {
+    public static boolean checkObsidianTower(World world, BlockPos pos, int x, int z) {
         for (int i = 0; i < 5; i++) {
             if (!world.getBlockState(pos.offset(x, i, z)).is(Blocks.OBSIDIAN)) {
                 return false;

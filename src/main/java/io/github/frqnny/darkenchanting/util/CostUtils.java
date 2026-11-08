@@ -3,9 +3,9 @@ package io.github.frqnny.darkenchanting.util;
 import io.github.frqnny.darkenchanting.config.ConfigEnchantment;
 import io.github.frqnny.darkenchanting.config.DarkEnchantingConfig;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.TieredItem;
-import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.enchantment.Enchantment;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.TieredItem;
 
 import java.util.Optional;
 
@@ -26,7 +26,7 @@ public class CostUtils {
                     individualCost = getEnchantmentCost(enchantment, powerToApply, false);
                 } else if (powerToApply < 0) { //taking off some/all.
                     takingOff = true;
-                    individualCost = getEnchantmentCost(enchantment, Math.absExact(powerToApply), true);
+                    individualCost = getEnchantmentCost(enchantment, Math.abs(powerToApply), true);
                 }
             } else {
                 individualCost = getEnchantmentCost(enchantment, power, false);

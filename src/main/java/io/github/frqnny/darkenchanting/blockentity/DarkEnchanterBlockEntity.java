@@ -2,30 +2,29 @@ package io.github.frqnny.darkenchanting.blockentity;
 
 import io.github.frqnny.darkenchanting.init.ModBlocks;
 import io.github.frqnny.darkenchanting.menu.DarkEnchanterMenu;
-import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.world.MenuProvider;
-import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.ContainerLevelAccess;
-import net.minecraft.world.level.block.state.BlockState;
-import org.jetbrains.annotations.Nullable;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.inventory.container.Container;
+import net.minecraft.inventory.container.INamedContainerProvider;
+import net.minecraft.util.IWorldPosCallable;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 
-public class DarkEnchanterBlockEntity extends BlockEntityWithBook implements MenuProvider {
-    public DarkEnchanterBlockEntity(BlockPos pos, BlockState state) {
-        super(ModBlocks.DE_BLOCK_ENTITY.get(), pos, state);
+import javax.annotation.Nullable;
+
+public class DarkEnchanterBlockEntity extends BlockEntityWithBook implements INamedContainerProvider {
+    public DarkEnchanterBlockEntity() {
+        super(ModBlocks.DE_BLOCK_ENTITY.get());
     }
 
     @Override
-    public Component getDisplayName() {
-        return new TranslatableComponent("block.dark_enchanting.dark_enchanter");
+    public ITextComponent getDisplayName() {
+        return new TranslationTextComponent("block.dark_enchanting.dark_enchanter");
     }
 
     @Nullable
     @Override
-    public AbstractContainerMenu createMenu(int containerId, Inventory inventory, Player player) {
-        return new DarkEnchanterMenu(containerId, inventory, ContainerLevelAccess.create(this.level, this.worldPosition));
+    public Container createMenu(int containerId, PlayerInventory inventory, PlayerEntity player) {
+        return new DarkEnchanterMenu(containerId, inventory, IWorldPosCallable.create(this.level, this.worldPosition));
     }
 }

@@ -1,11 +1,11 @@
 package io.github.frqnny.darkenchanting.config;
 
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.enchantment.Enchantment;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.registries.ForgeRegistries;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
+import javax.annotation.Nullable;
 
 public class ConfigEnchantment {
     public final String enchantmentId;

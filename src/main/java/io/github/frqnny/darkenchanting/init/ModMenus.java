@@ -2,21 +2,21 @@ package io.github.frqnny.darkenchanting.init;
 
 import io.github.frqnny.darkenchanting.DarkEnchanting;
 import io.github.frqnny.darkenchanting.menu.DarkEnchanterMenu;
-import net.minecraft.world.inventory.ContainerLevelAccess;
-import net.minecraft.world.inventory.MenuType;
-import net.minecraftforge.common.extensions.IForgeMenuType;
+import net.minecraft.inventory.container.ContainerType;
+import net.minecraft.util.IWorldPosCallable;
+import net.minecraftforge.common.extensions.IForgeContainerType;
 import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.fml.RegistryObject;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.RegistryObject;
 
 public class ModMenus {
-    public static final DeferredRegister<MenuType<?>> MENUS = DeferredRegister.create(ForgeRegistries.CONTAINERS, DarkEnchanting.MODID);
+    public static final DeferredRegister<ContainerType<?>> MENUS = DeferredRegister.create(ForgeRegistries.CONTAINERS, DarkEnchanting.MODID);
 
     // The client receives the block position written by NetworkHooks.openGui.
-    public static final RegistryObject<MenuType<DarkEnchanterMenu>> DARK_ENCHANTER = MENUS.register("dark_enchanter_gui",
-            () -> IForgeMenuType.create((containerId, inventory, buf) ->
-                    new DarkEnchanterMenu(containerId, inventory, ContainerLevelAccess.create(inventory.player.level, buf.readBlockPos()))));
+    public static final RegistryObject<ContainerType<DarkEnchanterMenu>> DARK_ENCHANTER = MENUS.register("dark_enchanter_gui",
+            () -> IForgeContainerType.create((containerId, inventory, buf) ->
+                    new DarkEnchanterMenu(containerId, inventory, IWorldPosCallable.create(inventory.player.level, buf.readBlockPos()))));
 
     public static void register(IEventBus modBus) {
         MENUS.register(modBus);

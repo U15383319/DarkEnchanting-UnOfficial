@@ -1,10 +1,10 @@
 package io.github.frqnny.darkenchanting.network;
 
 import io.github.frqnny.darkenchanting.DarkEnchanting;
-import net.minecraftforge.network.NetworkDirection;
-import net.minecraftforge.network.NetworkEvent;
-import net.minecraftforge.network.NetworkRegistry;
-import net.minecraftforge.network.simple.SimpleChannel;
+import net.minecraftforge.fml.network.NetworkDirection;
+import net.minecraftforge.fml.network.NetworkEvent;
+import net.minecraftforge.fml.network.NetworkRegistry;
+import net.minecraftforge.fml.network.simple.SimpleChannel;
 
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;

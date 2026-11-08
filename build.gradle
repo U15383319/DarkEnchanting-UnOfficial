@@ -11,9 +11,11 @@ base {
     archivesName = 'dark-enchanting'
 }
 
-java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+// Compile and run the 1.16.5 development environment with JDK 11 (Java 11 bytecode).
+java.toolchain.languageVersion = JavaLanguageVersion.of(11)
 
-// Dev-only game tests (src/gametest). Loaded as part of the mod only by the gameTestServer run; never in the jar.
+// Dev-only compatibility tests (src/gametest). Loaded as part of the mod only by the compat test server run
+// (`./gradlew runServer -PcompatTests`); never in the jar.
 sourceSets {
     gametest {
         compileClasspath += sourceSets.main.output
@@ -52,16 +54,17 @@ minecraft {
 
         server {
             args '--nogui'
-        }
 
-        // Runs every dark_enchanting game test (including the compatibility tests in src/gametest), then exits.
-        // Uses its own directory so the throwaway test world never mixes with run/ (shared by all branches).
-        gameTestServer {
-            workingDirectory project.file('run-gametest')
-            property 'forge.enabledGameTestNamespaces', mod_id
-            mods {
-                "${mod_id}" {
-                    source sourceSets.gametest
+            // `./gradlew runServer -PcompatTests` runs the compatibility tests in src/gametest on a throwaway world
+            // and stops the server. 1.16.5 has no GameTest framework, so the tests bring their own small runner.
+            // Uses its own directory so the test world never mixes with run/ (shared by all branches).
+            if (project.hasProperty('compatTests')) {
+                workingDirectory project.file('run-gametest')
+                property 'dark_enchanting.compatTests', 'true'
+                mods {
+                    "${mod_id}" {
+                        source sourceSets.gametest
+                    }
                 }
             }
         }
@@ -70,10 +73,10 @@ minecraft {
 
 repositories {
     maven {
-        name = 'Modrinth'
-        url = 'https://api.modrinth.com/maven'
+        name = 'CurseMaven'
+        url = 'https://www.cursemaven.com'
         content {
-            includeGroup 'maven.modrinth'
+            includeGroup 'curse.maven'
         }
     }
 }
@@ -88,10 +91,10 @@ configurations {
 dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
 
-    // A popular mod that adds new enchantments: Majrusz's Enchantments 1.9.2 (Forge 1.18.2)
-    // and its required Majrusz Library 5.1.2 (Modrinth version ids in gradle.properties).
-    devMods fg.deobf("maven.modrinth:majruszs-enchantments:${majruszs_enchantments_version}")
-    devMods fg.deobf("maven.modrinth:majrusz-library:${majrusz_library_version}")
+    // A popular mod that adds new enchantments: Majrusz's Enchantments 1.3.5 (Forge 1.16.5, CurseForge project
+    // "wonderful-enchantments") and its required Majrusz Library 2.0.1 (CurseForge file ids in gradle.properties).
+    devMods fg.deobf("curse.maven:wonderful-enchantments-417439:${majruszs_enchantments_file}")
+    devMods fg.deobf("curse.maven:majrusz-library-437409:${majrusz_library_file}")
 }
 
 // Majrusz Library discovers its classes by scanning jars in the game's ./mods folder, so it fails when loaded from
@@ -112,13 +115,14 @@ def devModsTask = { String name, String runDir ->
 def copyDevMods = devModsTask('copyDevMods', 'run')
 def copyGameTestDevMods = devModsTask('copyGameTestDevMods', 'run-gametest')
 
-// The game test world is throwaway; recreate it on every run.
+// The compat test world is throwaway; recreate it on every run.
 def cleanGameTestWorld = tasks.register('cleanGameTestWorld', Delete) {
     delete file('run-gametest/world')
 }
 
+def compatTests = project.hasProperty('compatTests')
 tasks.matching { it.name.startsWith('prepareRun') }.configureEach {
-    if (it.name.startsWith('prepareRunGameTestServer')) {
+    if (compatTests && it.name.startsWith('prepareRunServer')) {
         dependsOn copyGameTestDevMods, cleanGameTestWorld
     } else {
         dependsOn copyDevMods
@@ -160,4 +164,5 @@ tasks.named('jar', Jar).configure {
 
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
+    options.release = 11
 }

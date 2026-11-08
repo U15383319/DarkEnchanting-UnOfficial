@@ -1,26 +1,26 @@
 package io.github.frqnny.darkenchanting.client.gui;
 
-import net.minecraft.ChatFormatting;
-import net.minecraft.client.gui.components.AbstractSliderButton;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.client.gui.widget.AbstractSlider;
+import net.minecraft.enchantment.Enchantment;
+import net.minecraft.util.text.IFormattableTextComponent;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.text.TranslationTextComponent;
 
 import java.util.function.IntConsumer;
 
 /**
  * Discrete 0..maxLevel slider for a single enchantment. Replaces LibGui's WLabeledSlider.
  */
-public class EnchantmentSlider extends AbstractSliderButton {
+public class EnchantmentSlider extends AbstractSlider {
     public final Enchantment enchantment;
     private final int maxLevel;
     private final IntConsumer onLevelChanged;
     private int level;
 
     public EnchantmentSlider(int x, int y, int width, int height, Enchantment enchantment, int level, IntConsumer onLevelChanged) {
-        super(x, y, width, height, TextComponent.EMPTY, toValue(level, enchantment.getMaxLevel()));
+        super(x, y, width, height, StringTextComponent.EMPTY, toValue(level, enchantment.getMaxLevel()));
         this.enchantment = enchantment;
         this.maxLevel = enchantment.getMaxLevel();
         this.onLevelChanged = onLevelChanged;
@@ -32,18 +32,18 @@ public class EnchantmentSlider extends AbstractSliderButton {
         return maxLevel <= 0 ? 0.0D : Math.min(1.0D, Math.max(0.0D, (double) level / (double) maxLevel));
     }
 
-    public static Component getLabel(Enchantment enchantment, int level) {
-        MutableComponent text = new TranslatableComponent(enchantment.getDescriptionId());
+    public static ITextComponent getLabel(Enchantment enchantment, int level) {
+        IFormattableTextComponent text = new TranslationTextComponent(enchantment.getDescriptionId());
         if (enchantment.isCurse()) {
-            text.withStyle(ChatFormatting.RED);
+            text.withStyle(TextFormatting.RED);
         } else if (enchantment.isTreasureOnly()) {
-            text.withStyle(ChatFormatting.BLUE);
+            text.withStyle(TextFormatting.BLUE);
         } else {
-            text.withStyle(ChatFormatting.GRAY);
+            text.withStyle(TextFormatting.GRAY);
         }
 
         if (level > 0) {
-            text.append(" ").append(new TranslatableComponent("enchantment.level." + level));
+            text.append(" ").append(new TranslationTextComponent("enchantment.level." + level));
         }
 
         return text;

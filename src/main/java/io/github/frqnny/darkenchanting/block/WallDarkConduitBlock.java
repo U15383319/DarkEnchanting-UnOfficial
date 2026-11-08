@@ -1,22 +1,22 @@
 package io.github.frqnny.darkenchanting.block;
 
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.core.particles.ParticleOptions;
-import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.WallTorchBlock;
-import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.WallTorchBlock;
+import net.minecraft.particles.IParticleData;
+import net.minecraft.particles.ParticleTypes;
+import net.minecraft.util.Direction;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 
 import java.util.Random;
 
 public class WallDarkConduitBlock extends WallTorchBlock {
-    public WallDarkConduitBlock(Properties properties, ParticleOptions particle) {
+    public WallDarkConduitBlock(Properties properties, IParticleData particle) {
         super(properties, particle);
     }
 
     @Override
-    public void animateTick(BlockState state, Level level, BlockPos pos, Random random) {
+    public void animateTick(BlockState state, World level, BlockPos pos, Random random) {
         Direction direction = state.getValue(FACING);
         double d = (double) pos.getX() + 0.5D;
         double e = (double) pos.getY() + 0.8D;
