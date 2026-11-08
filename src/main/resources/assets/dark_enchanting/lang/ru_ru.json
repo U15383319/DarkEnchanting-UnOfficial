@@ -1,0 +1,16 @@
+{
+  "itemGroup.dark_enchanting.dark_enchanting_group": "Тёмные чары",
+  "block.dark_enchanting.dark_enchanter": "Тёмный Чарадейский стол",
+  "block.dark_enchanting.dark_conduit": "Тёмный факел",
+  "block.dark_enchanting.wall_dark_conduit": "Тёмный факел",
+  "item.dark_enchanting.table_upgrade": "Улучшение стола",
+  "message.dark_enchanting.table_upgrade": "Вам нужно щёлкнуть правой кнопкой мыши по ванильному столу зачарования, чтобы это сработало!",
+  "gui.dark_enchanting.enchant": "Зачаровать",
+  "gui.dark_enchanting.repair": "Починить",
+  "gui.dark_enchanting.enchant_cost": "Стоимость зачарования:",
+  "gui.dark_enchanting.repair_cost": "Стоимость починки:",
+  "gui.dark_enchanting.shrine_discount": "Скидка святилища:",
+  "gui.dark_enchanting.pay": "Оплата: %s опыта",
+  "gui.dark_enchanting.receive": "Получение: %s опыта",
+  "gui.dark_enchanting.you_have": "У вас: %s опыта"
+}

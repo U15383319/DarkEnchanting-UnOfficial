@@ -1,0 +1,241 @@
+package io.github.frqnny.darkenchanting.util;
+
+
+import io.github.frqnny.darkenchanting.config.DarkEnchantingConfig;
+import io.github.frqnny.darkenchanting.init.ModBlocks;
+import io.github.frqnny.darkenchanting.init.ModTags;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
+
+public class BookcaseUtils {
+
+    //Inner ring
+    public static boolean getObsidianCount(Level world, BlockPos blockPos) {
+        int baseObsidian = 0;
+        int z;
+        for (z = -1; z <= 1; ++z) { // LOOP for Y level
+            for (int x = -1; x <= 1; ++x) { // LOOP for Z level
+                if ((z != 0 || x != 0) && world.isEmptyBlock(blockPos.offset(x, 0, z)) && world.isEmptyBlock(blockPos.offset(x, 1, z))) //check if block not center
+                {
+                    /*
+                    check block on Coords:
+                    relative to dark enchanter btw,
+                    */
+                    if (world.getBlockState(blockPos.offset(x * 2, -1, z * 2)).is(ModTags.CRYING_OBSIDIAN)) {
+                        ++baseObsidian;
+                    }
+
+                    if (x != 0 && z != 0) {
+                        if (world.getBlockState(blockPos.offset(x * 2, -1, z)).is(ModTags.CRYING_OBSIDIAN)) {
+                            ++baseObsidian;
+                        }
+
+                        if (world.getBlockState(blockPos.offset(x, -1, z * 2)).is(ModTags.CRYING_OBSIDIAN)) {
+                            ++baseObsidian;
+                        }
+                    }
+                }
+            }
+        }
+        return baseObsidian == 16;
+    }
+
+    public static int getBookshelfCount(Level world, BlockPos blockPos) {
+        int bookshelves = 0;
+
+        int z;
+        int x;
+        int y;
+        if (getObsidianCount(world, blockPos)) {
+            for (y = 0; y <= 5; ++y) {
+                for (z = -1; z <= 1; ++z) { // LOOP for z level
+                    for (x = -1; x <= 1; ++x) { // LOOP for x level
+                        if ((z != 0 || x != 0) && world.isEmptyBlock(blockPos.offset(x, 0, z)) && world.isEmptyBlock(blockPos.offset(x, 1, z))) //check if block not center
+                        {
+                            // Y level is hardcoded, only check for y lvl 0,1
+                            /*
+                            check block on:
+                            relative to dark enchanter btw,
+                            everything that is labeled 1
+                            [1][0][1][0][1]
+                            [0]         [0]
+                            [1]         [1]
+                            [0]         [0]
+                            [1][0][1][0][1]
+                            */
+                            if (world.getBlockState(blockPos.offset(x * 2, y, z * 2)).is(ModTags.BOOKSHELVES)) {
+                                ++bookshelves;
+                            }
+                            /*
+                            check block on:
+                            relative to dark enchanter btw,
+                            everything that is labeled 0
+                            [1][0][1][0][1]
+                            [0]         [0]
+                            [1]         [1]
+                            [0]         [0]
+                            [1][0][1][0][1]
+                            */
+                            if (x != 0 && z != 0) {
+                                if (world.getBlockState(blockPos.offset(x * 2, y, z)).is(ModTags.BOOKSHELVES)) {
+                                    ++bookshelves;
+                                }
+                                if (world.getBlockState(blockPos.offset(x, y, z * 2)).is(ModTags.BOOKSHELVES)) {
+                                    ++bookshelves;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            return Math.min(15, bookshelves);
+
+        } else {
+            return 0;
+        }
+    }
+
+    //outer ring
+    public static boolean getObsidianCount2(Level world, BlockPos blockPos) {
+        int baseObsidian2 = 0;
+        int z;
+        int x;
+        int y = -1;
+        for (z = -4; z <= 4; ++z) { // LOOP for Z level
+            if (z != 0) //check if block not center
+            {
+                // check the x = 4 / x = -4 sides
+                if (world.getBlockState(blockPos.offset(4, y, z)).is(ModTags.CRYING_OBSIDIAN)) {
+                    ++baseObsidian2;
+                }
+                if (z != 4) {
+                    if (world.getBlockState(blockPos.offset(-4, y, z)).is(ModTags.CRYING_OBSIDIAN)) {
+                        ++baseObsidian2;
+                    }
+                }
+            }
+        }
+        for (x = -4; x <= 4; ++x) { // LOOP for X level
+            if (x != 0) //check if block not center
+            {
+                // check the z = 4 / z = -4 sides
+                if (world.getBlockState(blockPos.offset(x, y, 4)).is(ModTags.CRYING_OBSIDIAN)) {
+                    ++baseObsidian2;
+                }
+                if (x != 4) {
+                    if (world.getBlockState(blockPos.offset(x, y, -4)).is(ModTags.CRYING_OBSIDIAN)) {
+                        ++baseObsidian2;
+                    }
+                }
+            }
+        }
+        return Math.min(30, baseObsidian2) == 30;
+
+    }
+
+    public static int getBookshelfCount2(Level world, BlockPos blockPos) {
+        int bookshelves2 = 0;
+
+        int z;
+        int x;
+        int y;
+        if (getObsidianCount2(world, blockPos)) {
+            for (y = 0; y <= 5; ++y) { // Loop Y level
+                for (z = -4; z <= 4; ++z) { // LOOP for Z level
+                    if (z != 0) { //check if block not center
+                        if (world.getBlockState(blockPos.offset(4, y, z)).is(ModTags.BOOKSHELVES)) {
+                            ++bookshelves2;
+                        }
+                        if (z != 4) {
+                            if (world.getBlockState(blockPos.offset(-4, y, z)).is(ModTags.BOOKSHELVES)) {
+                                ++bookshelves2;
+                            }
+                        }
+                    }
+                }
+                for (x = -4; x <= 4; ++x) { // LOOP for X level
+                    if (x != 0) {//check if block not center
+                        if (world.getBlockState(blockPos.offset(x, y, 4)).is(ModTags.BOOKSHELVES)) {
+                            ++bookshelves2;
+                        }
+                        if (x != 4) {
+                            if (world.getBlockState(blockPos.offset(x, y, -4)).is(ModTags.BOOKSHELVES)) {
+                                ++bookshelves2;
+                            }
+                        }
+                    }
+                }
+            }
+            return Math.min(29, bookshelves2);
+        } else {
+            return 0;
+        }
+    }
+
+
+    public static int applyDiscount(int originalCost, Level world, BlockPos pos) {
+        return applyDiscount(originalCost, getDiscount(world, pos));
+    }
+
+    public static int applyDiscount(int originalCost, double discount) {
+        return (int) Math.ceil((originalCost * (1D - discount)));
+    }
+
+    public static double getDiscount(Level world, BlockPos pos) {
+        double halfDiscount = DarkEnchantingConfig.bookshelvesDiscount() / 2D;
+
+        double bookcase1 = getBookshelfCount(world, pos) / 15D * halfDiscount;
+        double bookcase2 = getBookshelfCount2(world, pos) / 29D * halfDiscount;
+        return bookcase1 + bookcase2 + getConduitDiscount(world, pos);
+    }
+
+    public static double getConduitDiscount(Level world, BlockPos pos) {
+        if (getBookshelfCount(world, pos) == 15D && getBookshelfCount2(world, pos) == 29D && getConduits(world, pos)) {
+            return DarkEnchantingConfig.conduitDiscount();
+        } else {
+            return 0;
+        }
+    }
+
+    //Conduit Counter
+    public static boolean getConduits(Level world, BlockPos blockPos) {
+        int conduitCount = 0;
+        int y = 5;
+
+        if (world.getBlockState(blockPos.offset(4, y, 4)).is(ModBlocks.DARK_TORCH.get())) {
+            if (checkObsidianTower(world, blockPos, 4, 4)) {
+                ++conduitCount;
+            }
+        }
+        if (world.getBlockState(blockPos.offset(-4, y, -4)).is(ModBlocks.DARK_TORCH.get())) {
+            if (checkObsidianTower(world, blockPos, -4, -4)) {
+                ++conduitCount;
+            }
+        }
+        if (world.getBlockState(blockPos.offset(-4, y, 4)).is(ModBlocks.DARK_TORCH.get())) {
+            if (checkObsidianTower(world, blockPos, -4, 4)) {
+                ++conduitCount;
+            }
+        }
+        if (world.getBlockState(blockPos.offset(4, y, -4)).is(ModBlocks.DARK_TORCH.get())) {
+            if (checkObsidianTower(world, blockPos, 4, -4)) {
+                ++conduitCount;
+            }
+        }
+
+        return conduitCount == 4;
+
+
+    }
+
+    public static boolean checkObsidianTower(Level world, BlockPos pos, int x, int z) {
+        for (int i = 0; i < 5; i++) {
+            if (!world.getBlockState(pos.offset(x, i, z)).is(Blocks.OBSIDIAN)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+}

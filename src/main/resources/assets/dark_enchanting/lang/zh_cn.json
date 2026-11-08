@@ -1,0 +1,16 @@
+{
+  "itemGroup.dark_enchanting.dark_enchanting_group": "暗黑附魔",
+  "block.dark_enchanting.dark_enchanter": "暗黑附魔台",
+  "block.dark_enchanting.dark_conduit": "暗黑支柱",
+  "block.dark_enchanting.wall_dark_conduit": "暗黑支柱",
+  "item.dark_enchanting.table_upgrade": "附魔台升级",
+  "message.dark_enchanting.table_upgrade": "你需要按住Shift+右键一个原版附魔台来升级！",
+  "gui.dark_enchanting.enchant": "附魔",
+  "gui.dark_enchanting.repair": "修复",
+  "gui.dark_enchanting.enchant_cost": "附魔花费：",
+  "gui.dark_enchanting.repair_cost": "修复花费：",
+  "gui.dark_enchanting.shrine_discount": "祭坛折扣：",
+  "gui.dark_enchanting.pay": "支付：%s 经验",
+  "gui.dark_enchanting.receive": "获得：%s 经验",
+  "gui.dark_enchanting.you_have": "你拥有：%s 经验"
+}

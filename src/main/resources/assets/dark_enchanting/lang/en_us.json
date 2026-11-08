@@ -1,0 +1,16 @@
+{
+  "itemGroup.dark_enchanting.dark_enchanting_group": "Dark Enchanting",
+  "block.dark_enchanting.dark_enchanter": "Dark Enchanter",
+  "block.dark_enchanting.dark_conduit": "Dark Conduit",
+  "block.dark_enchanting.wall_dark_conduit": "Dark Conduit",
+  "item.dark_enchanting.table_upgrade": "Table Upgrade",
+  "message.dark_enchanting.table_upgrade": "You need to shift-right click a vanilla Enchantment Table for this to work!",
+  "gui.dark_enchanting.enchant": "Enchant",
+  "gui.dark_enchanting.repair": "Repair",
+  "gui.dark_enchanting.enchant_cost": "Enchant Cost:",
+  "gui.dark_enchanting.repair_cost": "Repair Cost:",
+  "gui.dark_enchanting.shrine_discount": "Shrine Discount:",
+  "gui.dark_enchanting.pay": "Pay: %s XP",
+  "gui.dark_enchanting.receive": "Receive: %s XP",
+  "gui.dark_enchanting.you_have": "You have: %s XP"
+}
