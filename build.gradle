@@ -88,8 +88,8 @@ configurations {
 dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
 
-    // A popular mod that adds new enchantments: Majrusz's Enchantments 1.10.8 (Forge 1.20.1)
-    // and its required Majrusz Library 7.0.8 (Modrinth version ids in gradle.properties).
+    // A popular mod that adds new enchantments: Majrusz's Enchantments 1.10.7-backport.1 (Forge 1.19.2)
+    // and its required Majrusz Library 7.0.5-backport.1 (Modrinth version ids in gradle.properties).
     devMods fg.deobf("maven.modrinth:majruszs-enchantments:${majruszs_enchantments_version}")
     devMods fg.deobf("maven.modrinth:majrusz-library:${majrusz_library_version}")
 }

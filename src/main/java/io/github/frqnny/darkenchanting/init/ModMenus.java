@@ -16,7 +16,7 @@ public class ModMenus {
     // The client receives the block position written by NetworkHooks.openScreen.
     public static final RegistryObject<MenuType<DarkEnchanterMenu>> DARK_ENCHANTER = MENUS.register("dark_enchanter_gui",
             () -> IForgeMenuType.create((containerId, inventory, buf) ->
-                    new DarkEnchanterMenu(containerId, inventory, ContainerLevelAccess.create(inventory.player.level(), buf.readBlockPos()))));
+                    new DarkEnchanterMenu(containerId, inventory, ContainerLevelAccess.create(inventory.player.level, buf.readBlockPos()))));
 
     public static void register(IEventBus modBus) {
         MENUS.register(modBus);

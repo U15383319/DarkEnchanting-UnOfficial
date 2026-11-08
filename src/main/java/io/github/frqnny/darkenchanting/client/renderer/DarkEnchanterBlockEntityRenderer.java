@@ -2,7 +2,7 @@ package io.github.frqnny.darkenchanting.client.renderer;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Axis;
+import com.mojang.math.Vector3f;
 import io.github.frqnny.darkenchanting.DarkEnchanting;
 import io.github.frqnny.darkenchanting.blockentity.DarkEnchanterBlockEntity;
 import net.minecraft.client.model.BookModel;
@@ -43,8 +43,8 @@ public class DarkEnchanterBlockEntityRenderer implements BlockEntityRenderer<Dar
         }
 
         float newBookRotation = blockEntity.bookRotationPrev + bookRotationChange * tickDelta;
-        matrices.mulPose(Axis.YP.rotation(-newBookRotation));
-        matrices.mulPose(Axis.ZP.rotationDegrees(80.0F));
+        matrices.mulPose(Vector3f.YP.rotation(-newBookRotation));
+        matrices.mulPose(Vector3f.ZP.rotationDegrees(80.0F));
         float newPageAngle = Mth.lerp(tickDelta, blockEntity.pageAngle, blockEntity.nextPageAngle);
         float m = Mth.frac(newPageAngle + 0.25F) * 1.6F - 0.3F;
         float n = Mth.frac(newPageAngle + 0.75F) * 1.6F - 0.3F;

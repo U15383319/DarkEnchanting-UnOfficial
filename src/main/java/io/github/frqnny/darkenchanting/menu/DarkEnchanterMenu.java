@@ -108,7 +108,7 @@ public class DarkEnchanterMenu extends AbstractContainerMenu {
             }
 
             if (stack.isEmpty()) {
-                slot.setByPlayer(ItemStack.EMPTY);
+                slot.set(ItemStack.EMPTY);
             } else {
                 slot.setChanged();
             }
@@ -131,7 +131,7 @@ public class DarkEnchanterMenu extends AbstractContainerMenu {
     public void removed(Player player) {
         super.removed(player);
         // The client menu also has a real level access (needed for cost previews), so only return items on the server.
-        if (!player.level().isClientSide) {
+        if (!player.level.isClientSide) {
             this.clearContainer(player, this.inv);
         }
     }

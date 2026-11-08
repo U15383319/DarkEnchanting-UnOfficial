@@ -12,10 +12,12 @@ import io.github.frqnny.darkenchanting.util.PlayerUtils;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.gui.GuiGraphics;
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
@@ -104,25 +106,25 @@ public class DarkEnchanterScreen extends AbstractContainerScreen<DarkEnchanterMe
         super.init();
         this.leftPos = this.computeLeftPos();
 
-        this.enchantButton = this.addRenderableWidget(Button.builder(Component.literal("E"), b -> this.enchant())
-                .bounds(this.leftPos + 35, this.topPos + 60, 20, 20)
-                .tooltip(Tooltip.create(Component.translatable("gui.dark_enchanting.enchant")))
-                .build());
-        this.repairButton = this.addRenderableWidget(Button.builder(Component.literal("R"), b -> this.repair())
-                .bounds(this.leftPos + 35, this.topPos + 85, 20, 20)
-                .tooltip(Tooltip.create(Component.translatable("gui.dark_enchanting.repair")))
-                .build());
+        this.enchantButton = this.addRenderableWidget(new Button(this.leftPos + 35, this.topPos + 60, 20, 20,
+                Component.literal("E"), b -> this.enchant(), this.tooltip(Component.translatable("gui.dark_enchanting.enchant"))));
+        this.repairButton = this.addRenderableWidget(new Button(this.leftPos + 35, this.topPos + 85, 20, 20,
+                Component.literal("R"), b -> this.repair(), this.tooltip(Component.translatable("gui.dark_enchanting.repair"))));
         this.enchantButton.active = this.enchantEnabled;
         this.repairButton.active = this.repairEnabled;
 
         for (EnchantmentSlider slider : this.sliderCache.values()) {
-            slider.setX(this.leftPos + SLIDER_X);
+            slider.x = this.leftPos + SLIDER_X;
         }
 
         ItemStack current = this.menu.getEnchantStack();
         if (!ItemStack.matches(this.lastStack, current) || this.lastStack.isEmpty()) {
             this.onStackUpdate(current);
         }
+    }
+
+    private Button.OnTooltip tooltip(Component text) {
+        return (button, poseStack, mouseX, mouseY) -> this.renderTooltip(poseStack, text, mouseX, mouseY);
     }
 
     @Override
@@ -273,13 +275,13 @@ public class DarkEnchanterScreen extends AbstractContainerScreen<DarkEnchanterMe
         return Math.max(centered, Math.min(panelSpace, maxLeft));
     }
 
-    private void renderCostPanel(GuiGraphics graphics) {
+    private void renderCostPanel(PoseStack poseStack) {
         List<Component> summary = this.getCostSummary();
         int textWidth = this.costPanelTextWidth(summary);
         // Right-align the panel to the window so longer translations grow to the left instead of covering the slot.
         int x = this.leftPos - COST_PANEL_GAP - TOOLTIP_FRAME - textWidth - TOOLTIP_OFFSET;
         x = Math.max(x, TOOLTIP_FRAME + 1 - TOOLTIP_OFFSET);
-        graphics.renderComponentTooltip(this.font, summary, x, this.topPos + COST_PANEL_Y);
+        this.renderComponentTooltip(poseStack, summary, x, this.topPos + COST_PANEL_Y);
     }
 
     // ---------------------------------------------------------------- scrolling list
@@ -299,8 +301,8 @@ public class DarkEnchanterScreen extends AbstractContainerScreen<DarkEnchanterMe
     private void layoutSliders() {
         int y = this.topPos + LIST_Y + 1 - (int) this.scrollAmount;
         for (EnchantmentSlider slider : this.enchantmentSliders) {
-            slider.setX(this.leftPos + SLIDER_X);
-            slider.setY(y);
+            slider.x = this.leftPos + SLIDER_X;
+            slider.y = y;
             y += ROW_HEIGHT;
         }
     }
@@ -396,15 +398,15 @@ public class DarkEnchanterScreen extends AbstractContainerScreen<DarkEnchanterMe
     // ---------------------------------------------------------------- rendering
 
     @Override
-    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        this.renderBackground(graphics);
-        super.render(graphics, mouseX, mouseY, partialTick);
-        this.renderSliders(graphics, mouseX, mouseY, partialTick);
-        this.renderCostPanel(graphics);
-        this.renderTooltip(graphics, mouseX, mouseY);
+    public void render(PoseStack poseStack, int mouseX, int mouseY, float partialTick) {
+        this.renderBackground(poseStack);
+        super.render(poseStack, mouseX, mouseY, partialTick);
+        this.renderSliders(poseStack, mouseX, mouseY, partialTick);
+        this.renderCostPanel(poseStack);
+        this.renderTooltip(poseStack, mouseX, mouseY);
     }
 
-    private void renderSliders(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+    private void renderSliders(PoseStack poseStack, int mouseX, int mouseY, float partialTick) {
         this.clampScroll();
         this.layoutSliders();
 
@@ -414,73 +416,76 @@ public class DarkEnchanterScreen extends AbstractContainerScreen<DarkEnchanterMe
         int sliderMouseX = mouseInList ? mouseX : -1000;
         int sliderMouseY = mouseInList ? mouseY : -1000;
 
-        graphics.enableScissor(x, y, x + LIST_WIDTH, y + LIST_HEIGHT);
+        GuiComponent.enableScissor(x, y, x + LIST_WIDTH, y + LIST_HEIGHT);
         for (EnchantmentSlider slider : this.enchantmentSliders) {
-            if (slider.getY() + SLIDER_HEIGHT >= y && slider.getY() <= y + LIST_HEIGHT) {
-                slider.render(graphics, sliderMouseX, sliderMouseY, partialTick);
+            if (slider.y + SLIDER_HEIGHT >= y && slider.y <= y + LIST_HEIGHT) {
+                slider.render(poseStack, sliderMouseX, sliderMouseY, partialTick);
             }
         }
-        graphics.disableScissor();
+        GuiComponent.disableScissor();
 
         int maxScroll = this.maxScroll();
         if (maxScroll > 0) {
             int barX = this.leftPos + SCROLLBAR_X;
-            graphics.fill(barX, y, barX + SCROLLBAR_WIDTH, y + LIST_HEIGHT, 0xFF000000);
+            fill(poseStack, barX, y, barX + SCROLLBAR_WIDTH, y + LIST_HEIGHT, 0xFF000000);
             int thumb = this.scrollbarThumbHeight();
             int thumbY = y + (int) (this.scrollAmount * (LIST_HEIGHT - thumb) / maxScroll);
-            graphics.fill(barX, thumbY, barX + SCROLLBAR_WIDTH, thumbY + thumb, 0xFF808080);
-            graphics.fill(barX, thumbY, barX + SCROLLBAR_WIDTH - 1, thumbY + thumb - 1, 0xFFC0C0C0);
+            fill(poseStack, barX, thumbY, barX + SCROLLBAR_WIDTH, thumbY + thumb, 0xFF808080);
+            fill(poseStack, barX, thumbY, barX + SCROLLBAR_WIDTH - 1, thumbY + thumb - 1, 0xFFC0C0C0);
         }
     }
 
     @Override
-    protected void renderBg(GuiGraphics graphics, float partialTick, int mouseX, int mouseY) {
-        drawPanel(graphics, this.leftPos, this.topPos, this.imageWidth, this.imageHeight);
+    protected void renderBg(PoseStack poseStack, float partialTick, int mouseX, int mouseY) {
+        drawPanel(poseStack, this.leftPos, this.topPos, this.imageWidth, this.imageHeight);
         for (Slot slot : this.menu.slots) {
-            drawSlot(graphics, this.leftPos + slot.x - 1, this.topPos + slot.y - 1);
+            drawSlot(poseStack, this.leftPos + slot.x - 1, this.topPos + slot.y - 1);
         }
         // The texture is a 143x138 framed box (rest transparent). Draw it 12 px shorter by skipping
         // rows of its uniform interior, matching the shortened list.
         int bgX = this.leftPos + 64;
         int bgY = this.topPos + 16;
         int bottomRows = TABLE_BG_HEIGHT - TABLE_BG_TOP_ROWS - TABLE_BG_SKIPPED_ROWS;
-        graphics.blit(TABLE_BACKGROUND, bgX, bgY, 0, 0, TABLE_BG_WIDTH, TABLE_BG_TOP_ROWS, 208, 160);
-        graphics.blit(TABLE_BACKGROUND, bgX, bgY + TABLE_BG_TOP_ROWS, 0, TABLE_BG_TOP_ROWS + TABLE_BG_SKIPPED_ROWS,
+        RenderSystem.setShader(GameRenderer::getPositionTexShader);
+        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+        RenderSystem.setShaderTexture(0, TABLE_BACKGROUND);
+        blit(poseStack, bgX, bgY, 0, 0, TABLE_BG_WIDTH, TABLE_BG_TOP_ROWS, 208, 160);
+        blit(poseStack, bgX, bgY + TABLE_BG_TOP_ROWS, 0, TABLE_BG_TOP_ROWS + TABLE_BG_SKIPPED_ROWS,
                 TABLE_BG_WIDTH, bottomRows, 208, 160);
     }
 
     /**
      * Vanilla-style light gray panel, like LibGui's default root panel background.
      */
-    private static void drawPanel(GuiGraphics g, int x, int y, int w, int h) {
+    private static void drawPanel(PoseStack g, int x, int y, int w, int h) {
         int black = 0xFF000000;
         int white = 0xFFFFFFFF;
         int shadow = 0xFF555555;
         int fill = 0xFFC6C6C6;
 
-        g.fill(x + 1, y + 1, x + w - 1, y + h - 1, fill);
+        fill(g, x + 1, y + 1, x + w - 1, y + h - 1, fill);
         // outline
-        g.fill(x + 2, y, x + w - 2, y + 1, black);
-        g.fill(x + 2, y + h - 1, x + w - 2, y + h, black);
-        g.fill(x, y + 2, x + 1, y + h - 2, black);
-        g.fill(x + w - 1, y + 2, x + w, y + h - 2, black);
-        g.fill(x + 1, y + 1, x + 2, y + 2, black);
-        g.fill(x + w - 2, y + 1, x + w - 1, y + 2, black);
-        g.fill(x + 1, y + h - 2, x + 2, y + h - 1, black);
-        g.fill(x + w - 2, y + h - 2, x + w - 1, y + h - 1, black);
+        fill(g, x + 2, y, x + w - 2, y + 1, black);
+        fill(g, x + 2, y + h - 1, x + w - 2, y + h, black);
+        fill(g, x, y + 2, x + 1, y + h - 2, black);
+        fill(g, x + w - 1, y + 2, x + w, y + h - 2, black);
+        fill(g, x + 1, y + 1, x + 2, y + 2, black);
+        fill(g, x + w - 2, y + 1, x + w - 1, y + 2, black);
+        fill(g, x + 1, y + h - 2, x + 2, y + h - 1, black);
+        fill(g, x + w - 2, y + h - 2, x + w - 1, y + h - 1, black);
         // highlight (top/left) and shadow (bottom/right)
-        g.fill(x + 2, y + 1, x + w - 3, y + 3, white);
-        g.fill(x + 1, y + 2, x + 3, y + h - 3, white);
-        g.fill(x + 3, y + h - 3, x + w - 2, y + h - 1, shadow);
-        g.fill(x + w - 3, y + 3, x + w - 1, y + h - 2, shadow);
-        g.fill(x + 2, y + 2, x + 3, y + 3, white);
+        fill(g, x + 2, y + 1, x + w - 3, y + 3, white);
+        fill(g, x + 1, y + 2, x + 3, y + h - 3, white);
+        fill(g, x + 3, y + h - 3, x + w - 2, y + h - 1, shadow);
+        fill(g, x + w - 3, y + 3, x + w - 1, y + h - 2, shadow);
+        fill(g, x + 2, y + 2, x + 3, y + 3, white);
     }
 
-    private static void drawSlot(GuiGraphics g, int x, int y) {
-        g.fill(x, y, x + 18, y + 18, 0xFF8B8B8B);
-        g.fill(x, y, x + 17, y + 1, 0xFF373737);
-        g.fill(x, y, x + 1, y + 17, 0xFF373737);
-        g.fill(x + 1, y + 17, x + 18, y + 18, 0xFFFFFFFF);
-        g.fill(x + 17, y + 1, x + 18, y + 18, 0xFFFFFFFF);
+    private static void drawSlot(PoseStack g, int x, int y) {
+        fill(g, x, y, x + 18, y + 18, 0xFF8B8B8B);
+        fill(g, x, y, x + 17, y + 1, 0xFF373737);
+        fill(g, x, y, x + 1, y + 17, 0xFF373737);
+        fill(g, x + 1, y + 17, x + 18, y + 18, 0xFFFFFFFF);
+        fill(g, x + 17, y + 1, x + 18, y + 18, 0xFFFFFFFF);
     }
 }

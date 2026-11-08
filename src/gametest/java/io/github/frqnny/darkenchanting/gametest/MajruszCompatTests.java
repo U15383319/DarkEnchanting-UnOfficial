@@ -86,7 +86,7 @@ public class MajruszCompatTests {
      */
     private static ServerPlayer survivalPlayer(GameTestHelper helper) {
         ServerLevel level = helper.getLevel();
-        ServerPlayer player = new ServerPlayer(level.getServer(), level, new GameProfile(UUID.randomUUID(), "dark-enchanting-test"));
+        ServerPlayer player = new ServerPlayer(level.getServer(), level, new GameProfile(UUID.randomUUID(), "dark-enchanting-test"), null);
         new ServerGamePacketListenerImpl(level.getServer(), new Connection(PacketFlow.SERVERBOUND), player);
         return player;
     }
