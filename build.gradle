@@ -8,7 +8,7 @@ version = mod_version
 group = mod_group_id
 
 base {
-    archivesName = 'dark-enchanting'
+    archivesName = 'dark-enchanting-umbra'
 }
 
 // Compile and run the 1.16.5 development environment with JDK 11 (Java 11 bytecode).
