@@ -145,7 +145,8 @@ tasks.named('processResources', ProcessResources).configure {
 }
 
 tasks.named('jar', Jar).configure {
-    from('LICENSE') {
+    // LGPL-3.0 (LICENSE) is a set of additional permissions on top of GPL-3.0 (COPYING); ship both.
+    from(['LICENSE', 'COPYING']) {
         into 'META-INF'
     }
     manifest {
