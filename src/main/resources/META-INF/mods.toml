@@ -1,14 +1,15 @@
 modLoader="javafml"
 loaderVersion="${loader_version_range}"
 license="${mod_license}"
-issueTrackerURL="https://github.com/frqnny/dark-enchanting/issues"
+issueTrackerURL="https://github.com/U15383319/DarkEnchanting-UnOfficial/issues"
 
 [[mods]]
 modId="${mod_id}"
 version="${mod_version}"
 displayName="${mod_name}"
-displayURL="https://github.com/frqnny/dark-enchanting"
+displayURL="https://github.com/U15383319/DarkEnchanting-UnOfficial"
 logoFile="icon.png"
+credits="Original Dark Enchanting (Fabric) by Frqnny: https://github.com/frqnny/dark-enchanting"
 authors="${mod_authors}"
 description='''${mod_description}'''
 
