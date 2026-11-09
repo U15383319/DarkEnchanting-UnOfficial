@@ -2,8 +2,7 @@
 
 ## 1.0.0 - 2026-11-09
 
-First release of Dark Enchanting Umbra, a Forge port of Dark Enchanting 1.0.4 (Fabric 1.20.1) by Frqnny,
-for Minecraft 1.20.1, 1.19.2, 1.18.2 and 1.16.5.
+First release of Dark Enchanting Umbra, a Forge port of Dark Enchanting 1.0.4 (Fabric 1.20.1) by Frqnny, for Minecraft 1.20.1, 1.19.2, 1.18.2 and 1.16.5.
 
 Changes compared to the original:
 
